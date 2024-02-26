@@ -1,0 +1,134 @@
+<?php
+$escape = $this->plugin('escapeHtml');
+$translate = $this->plugin('translate');
+
+$this->htmlElement('body')->appendAttribute('class', 'item resource browse');
+
+$query = $this->params()->fromQuery();
+
+$sortHeadings = [
+    [
+        'label' => $translate('Identifier'),
+        'value' => 'dcterms:identifier'
+    ],
+    [
+        'label' => $translate('Date'),
+        'value' => 'dcterms:date'
+    ],
+];
+
+?>
+<?php if (isset($itemSet)): ?>
+<?php $this->htmlElement('body')->appendAttribute('class', 'item-set');
+    $query['item_set_id'] = $itemSet->id(); ?>
+<?php endif; ?>
+
+<?php if (isset($itemSet)): ?>
+    <h2 style="margin-bottom:0;padding-bottom:0;">
+    [<?php echo $itemSet->value("dcterms:identifier"); ?>]</h2>
+    <span style="font-size:0.9em;"><a href="<?php echo $itemSet->value("bibo:uri"); ?>"><?php echo $itemSet->value("bibo:uri"); ?></a></span>
+    <!--<h3><?php echo $translate('Metadata'); ?></h3>-->
+    <p style="font-size:0.8em;margin-bottom:10px !important;padding-bottom:0 !important;">
+	&rarr; <a href="#items">View documents</a> &nbsp;
+
+<?php
+$isVersionOf = $itemSet->value('dcterms:isVersionOf');
+if($isVersionOf) {
+  $uri = $isVersionOf->uri();
+  echo '&rarr; <a target="_blank" style="font-weight:bold;" href="'.$uri.'">View as notebook</a>';
+}
+
+$hasVersion = $itemSet->value('dcterms:hasVersion');
+if($hasVersion) {
+  $uri = $hasVersion->uri();
+  echo '
+    &rarr; <a target="_blank" href="'.$uri.'">View folder on microfilm</a>
+    <img src="/themes/centerrow/asset/img/archive.png" style="height:15px;vertical-align:middle;">
+    &nbsp;';
+}
+?>
+	&rarr; <a href="#metadata">View metadata about this item set</a>
+    </p>
+    <div class="metadata" id="metadata" style="width:100%;margin:0 auto;background-color:#eee;border-radius:20px;padding:20px;">
+        <?php //echo $itemSet->displayValues(); ?>
+	<h3>Part Of: 
+	<?php echo $itemSet->value("dcterms:isPartOf"); ?>
+	</h3>
+	<p><strong>
+	<?php echo $itemSet->value("dcterms:title"); ?>
+	</strong></p>
+	<p>
+	<?php echo $itemSet->value("dcterms:description"); ?>
+	</p>
+	<p>
+	<?php echo $itemSet->value("dcterms:rights"); ?> 
+	<?php 
+	  $type = $itemSet->value("dcterms:type");
+	  echo '<br><br>Show all folders in the '; 
+	  echo '<a href="/item-set?property[0][joiner]=and&property[0][property]=8&property[0][type]=eq&property[0][text]='.$type.'&submit=Search">'.$type.'</a>';
+	  echo ' category >>';
+	?>
+	</p>
+    </div>
+    <!--
+    <?php echo $this->pageTitle($translate('Viewer'), 3); ?>
+    -->
+<?php else: ?>
+    <?php echo $this->pageTitle($translate('Items'), 2); ?>
+<?php endif; ?>
+
+<!--
+<p>Please use the "Index" in the document viewer below to browse all documents within this item set. By default, the first document is displayed.</p> 
+
+<?php $this->trigger('view.browse.after'); ?>
+<div style="clear:both;"></div>
+<br>
+-->
+
+<a id="items">
+<?php echo $this->pageTitle($translate('Items'), 3); ?>
+</a>
+
+<?php echo $this->searchFilters(); ?>
+
+<div class="browse-controls">
+    <?php echo $this->pagination(); ?>
+    <?php //echo $this->hyperlink($translate('Advanced search'), $this->url('site/resource', ['controller' => 'item', 'action' => 'search'], ['query' => $query], true), ['class' => 'advanced-search']); ?>
+    <?php echo $this->sortSelector($sortHeadings); ?>
+</div>
+<!--
+<div class="browse-controls" style="border-bottom:1px solid darkred;flex-direction:unset;">To improve browsing speed, choose a decade: 
+	<a href="http://edisondigital.rutgers.edu/s/digital/item?property%5B0%5D%5Bproperty%5D=41&property%5B0%5D%5Btype%5D=eq&property%5B0%5D%5Btext%5D=1860-1869">1860s</a>
+	<a href="http://edisondigital.rutgers.edu/s/digital/item?property%5B0%5D%5Bproperty%5D=41&property%5B0%5D%5Btype%5D=eq&property%5B0%5D%5Btext%5D=1870-1879">1870s</a>
+	<a href="http://edisondigital.rutgers.edu/s/digital/item?property%5B0%5D%5Bproperty%5D=41&property%5B0%5D%5Btype%5D=eq&property%5B0%5D%5Btext%5D=1880-1889">1880s</a>
+	<a href="http://edisondigital.rutgers.edu/s/digital/item?property%5B0%5D%5Bproperty%5D=41&property%5B0%5D%5Btype%5D=eq&property%5B0%5D%5Btext%5D=1890-1899">1890s</a>
+	<a href="http://edisondigital.rutgers.edu/s/digital/item?property%5B0%5D%5Bproperty%5D=41&property%5B0%5D%5Btype%5D=eq&property%5B0%5D%5Btext%5D=1900-1909">1900s</a>
+	<a href="http://edisondigital.rutgers.edu/s/digital/item?property%5B0%5D%5Bproperty%5D=41&property%5B0%5D%5Btype%5D=eq&property%5B0%5D%5Btext%5D=1910-1919">1910s</a>
+	<a href="http://edisondigital.rutgers.edu/s/digital/item?property%5B0%5D%5Bproperty%5D=41&property%5B0%5D%5Btype%5D=eq&property%5B0%5D%5Btext%5D=1920-1929">1920s</a>
+	<a href="http://edisondigital.rutgers.edu/s/digital/item?property%5B0%5D%5Bproperty%5D=41&property%5B0%5D%5Btype%5D=eq&property%5B0%5D%5Btext%5D=1930-1939">1930s</a>
+	<a href="http://edisondigital.rutgers.edu/s/digital/item?property%5B0%5D%5Bproperty%5D=41&property%5B0%5D%5Btype%5D=eq&property%5B0%5D%5Btext%5D=1940-1949">1940s</a>
+</div>
+-->
+<ul class="resource-list">
+    <?php foreach ($items as $item): ?>
+    <li class="item resource">
+        <?php if ($thumbnail = $this->thumbnail($item, 'medium')): ?>
+        <?php 
+	  $itemThumbnail = $item->linkRaw($thumbnail); 
+  	  echo $itemThumbnail;
+	?>
+        <?php 
+	  else:
+		echo '<div style="width:95%;height:400px;background-color:#eee;padding:40%;text-align:center;border-radius:10px;">No image</div>';
+	  endif; ?>
+        <h4><?php echo $item->link($item->displayTitle()); ?></h4>
+        <?php if ($date = $item->value('dcterms:date')): ?>
+        <div class="date"><?php echo $date; ?></div>
+        <?php endif; ?>
+    </li>
+    <?php endforeach; ?>
+</ul>
+<?php echo $this->pagination(); ?>
+<!--
+<?php $this->trigger('view.browse.after'); ?>
+-->

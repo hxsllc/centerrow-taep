@@ -1,0 +1,58 @@
+<?php
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+
+$this->htmlElement('body')->appendAttribute('class', 'item-set resource browse');
+$headingTerm = $this->siteSetting('browse_heading_property_term', 'dcterms:title');
+$bodyTerm = $this->siteSetting('browse_body_property_term', 'dcterms:description');
+
+$query = $this->params()->fromQuery();
+
+$sortHeadings = [
+    [
+     	'label' => $translate('Identifier'),
+        'value' => 'dcterms:identifier'
+    ],
+];
+
+?>
+
+<?php echo $this->pageTitle($translate('Item Sets'), 2); ?>
+
+<?php echo $this->searchFilters(); ?>
+
+<div class="browse-controls">
+    <?php echo $this->pagination(); ?>
+    <?php echo $this->hyperlink($translate('Advanced item set search'), $this->url(null, ['action' => 'search'], true), ['class' => 'advanced-search']); ?>
+    <?php echo $this->sortSelector($sortHeadings); ?>
+</div>
+
+<?php $this->trigger('view.browse.before'); ?>
+<ul class="resource-list">
+<?php
+foreach ($itemSets as $itemSet):
+    $heading = $itemSet->value($headingTerm, ['default' => $translate('[Untitled]')]);
+    $body = $itemSet->value($bodyTerm);
+?>
+    <li class="item-set resource">
+        <?php echo $itemSet->linkRaw($this->thumbnail($itemSet, 'medium')); ?>
+	<?php 
+	  echo '<h4>';
+	  echo $itemSet->value('dcterms:identifier');
+	  echo ' &middot; ';
+	  echo $itemSet->value('dcterms:temporal');
+	  echo '</h4>';
+
+	  $values = $itemSet->value('dcterms:isPartOf', ['all' => true]);
+	  foreach ($values as $value) { echo $value.'<br>'; }
+
+	  //echo ''.$itemSet->value('dcterms:isPartOf').'<br/>';
+	  echo '<em>'.$itemSet->value('dcterms:title').'</em><br/>';
+	  echo $itemSet->link("View item set");
+	?>
+
+    </li>
+<?php endforeach; ?>
+</ul>
+<?php $this->trigger('view.browse.after'); ?>
+<?php echo $this->pagination(); ?>
